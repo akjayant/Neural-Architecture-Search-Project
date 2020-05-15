@@ -129,9 +129,22 @@ class ENAS():
             loom.add_function(Lunar_pytorch_enas.train_dqn,samples[3],{})
 
             output =  loom.execute()
+            del loom
+            loom1 = ProcessLoom(max_runner_cap = 4)
+            loom1.add_function(Lunar_pytorch_enas.test,samples[0][:4],{})
+            loom1.add_function(Lunar_pytorch_enas.test,samples[1][:4],{})
+            loom1.add_function(Lunar_pytorch_enas.test,samples[2][:4],{})
+            loom1.add_function(Lunar_pytorch_enas.test,samples[3][:4],{})
+            output_rewards = loom1.execute()
+            reward_epoch = [output_rewards[0]['output'],output_rewards[1]['output'],output_rewards[2]['output'],output_rewards[3]['output']]
+            del loom1
+
+
+
+
             for m in range(self.samples_per_policy):
-                a,b,c,d,_ = samples[m]
-                reward_i = Lunar_pytorch_enas.test(a,b,c,d)
+                #a,b,c,d,_ = samples[m]
+                reward_i = reward_epoch[m]
                 reward_history.append(reward_i)
                 print("Reward = ",reward_i)
 

@@ -13,7 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
-
+from tqdm import tqdm
 
 # In[2]:
 
@@ -100,6 +100,7 @@ class ExperienceReplays:
 #-------------------------DUEL DQN ALGORITHM---------------------------------
 class DDQN:
     def __init__(self, state_size, action_size, seed,n_fc1,n_fc2,af_1,af_2,device):
+        #self.learn_mode = learn_mode
         self.device = device
         self.state_size = state_size
         self.action_size = action_size
@@ -129,7 +130,7 @@ class DDQN:
         try:
             fc2_weight = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_weight.pkl")
             fc2_bias = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_bias.pkl")
-            print("Shared weight fc1 history found {}_{}".format(n_fc2,af_2 ))
+            print("Shared weight fc2 history found {}_{}".format(n_fc2,af_2 ))
             with torch.no_grad():
                 # self.q_network.fc1.weight.copy_(fc1_weight)
                 # self.q_network.fc1.bias.copy_(fc1_bias)
@@ -140,7 +141,7 @@ class DDQN:
                 self.fixed_network.fc2.weight.copy_(fc2_weight)
                 self.fixed_network.fc2.bias.copy_(fc2_bias)
         except:
-            print("No layer 2 shared history found {}_{}".format(n_fc1,af_1))
+            print("No layer 2 shared history found {}_{}".format(n_fc2,af_2))
             pass
 
 
@@ -266,7 +267,7 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     scores = []
     scores_window = deque(maxlen=100)
     eps = EPS_START
-    for episode in range(1, MAX_EPISODES + 1):
+    for episode in tqdm(range(1, MAX_EPISODES + 1)):
         state = env.reset()
         score = 0
         for t in range(MAX_STEPS):
@@ -347,6 +348,7 @@ def test(n_fc1,n_fc2,af_1,af_2):
         device = set_device()
         dqn_agent = DDQN(8,4, 0,n_fc1,n_fc2,af_1,af_2,device)
         dqn_agent.q_network.load_state_dict(torch.load('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth'))
+        #dqn_agent.eval()
         print("model_loaded")
         dump_pickle(dqn_agent.q_network.state_dict()['fc1.weight'],str(n_fc1)+"_"+str(af_1)+"fc1_weight")
         dump_pickle(dqn_agent.q_network.state_dict()['fc1.bias'],str(n_fc1)+"_"+str(af_1)+"fc1_bias")
@@ -357,21 +359,19 @@ def test(n_fc1,n_fc2,af_1,af_2):
         print("Calculating reward......")
         env = set_env_seed(799)
         total_score = 0
-        with torch.no_grad():
-            for i in range(500):
-                score = 0
 
+        for i in range(500):
+            score = 0
+            state = env.reset()
+            while True:
 
-                state = env.reset()
-                while True:
-
-                    action = dqn_agent.epsilor_greedy_act(state)
-                    next_state, reward, done, info = env.step(action)
-                    state = next_state
-                    score += reward
-                    if done:
-                        break
-                total_score+=score
+                action = dqn_agent.epsilor_greedy_act(state)
+                next_state, reward, done, info = env.step(action)
+                state = next_state
+                score += reward
+                if done:
+                    break
+            total_score+=score
                 #print('episode: {} scored {}'.format(i, score))
         print("Average_Score = ",total_score/500)
         f = open("logger_results_enas.txt",'a')
