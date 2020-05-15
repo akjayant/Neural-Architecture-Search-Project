@@ -110,15 +110,15 @@ class DDQN:
         self.q_network = QNet(state_size, action_size, seed, n_fc1, n_fc2,af_1,af_2).to(self.device)
         print("Training....",self.q_network)
         self.fixed_network = QNet(state_size, action_size, seed, n_fc1, n_fc2,af_1,af_2).to(self.device)
-        self.flag_1 = 0
-        self.flag_2 = 0
+        #self.flag_1 = 0
+        #self.flag_2 = 0
         print("------------Initializing if some warm start is present.......")
         try:
             fc1_weight = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_weight.pkl")
             #print(fc1_weight)
             fc1_bias = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_bias.pkl")
             print("Shared weight fc1 history found {}_{}".format(n_fc1,af_1))
-            self.flag_1 = 1
+            #self.flag_1 = 1
             with torch.no_grad():
                 self.q_network.fc1.weight.copy_(fc1_weight)
                 self.q_network.fc1.bias.copy_(fc1_bias)
@@ -138,7 +138,7 @@ class DDQN:
             fc2_weight = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_weight.pkl")
             fc2_bias = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_bias.pkl")
             print("Shared weight fc2 history found {}_{}".format(n_fc2,af_2 ))
-            self.flag_2 = 1
+            #self.flag_2 = 1
             with torch.no_grad():
                 # self.q_network.fc1.weight.copy_(fc1_weight)
                 # self.q_network.fc1.bias.copy_(fc1_bias)
@@ -156,10 +156,10 @@ class DDQN:
 
 
 
-        if self.flag_1==0 or self.flag_2==0:
-            self.optimizer = optim.Adam(self.q_network.parameters())
-            self.memory = ExperienceReplays(BUFFER_SIZE, BATCH_SIZE, seed, self.device)  #alloting memory for experience buffer
-            self.timestep = 0
+
+        self.optimizer = optim.Adam(self.q_network.parameters())
+        self.memory = ExperienceReplays(BUFFER_SIZE, BATCH_SIZE, seed, self.device)  #alloting memory for experience buffer
+        self.timestep = 0
         #return flag_1,flag_2
 
 
@@ -279,45 +279,63 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
 
     print("Device initialised - ", device)
     dqn_agent = DDQN(state_size, action_size, 0,n_fc1,n_fc2,af_1,af_2,device)
-    if dqn_agent.flag_1 == 0 or dqn_agent.flag_2==0:
-        arch = str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2)
-        start = time()
-        scores = []
-        scores_window = deque(maxlen=100)
-        eps = EPS_START
-        for episode in tqdm(range(1, MAX_EPISODES + 1)):
-            state = env.reset()
-            score = 0
-            for t in range(MAX_STEPS):
-                action = dqn_agent.epsilor_greedy_act(state, eps)
-                next_state, reward, done, info = env.step(action)
-                dqn_agent.step(state, action, reward, next_state, done)
-                state = next_state
-                score += reward
-                if done:
-                    break
-
-                eps = max(eps * EPS_DECAY, EPS_MIN)
-                if episode % PRINT_EVERY == 0:
-                    mean_score = np.mean(scores_window)
-                    print('\r{} architecture Progress {}/{}, average score:{:.2f}'.format(arch,episode, MAX_EPISODES, mean_score), end="")
-                if score >= ENV_SOLVED:
-                    mean_score = np.mean(scores_window)
-                    print('\r{} architecture Environment solved in {} episodes, average score: {:.2f}'.format(arch,episode, mean_score), end="")
-                    sys.stdout.flush()
-                    dqn_agent.checkpoint('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth')
-                    break
-
-            scores_window.append(score)
-            scores.append(score)
-
-        end = time()
-        print('Took {} seconds'.format(end - start))
-        time_taken = end - start
-        return time_taken
+    f1 = open("non_converging_models.txt",'r')
+    ncm = f1.readlines()
+    if str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2) in ncm:
+        ncm_flag = 1
     else:
+        ncm_flag = 0
+
+    try:
+        #dqn_agent1 = DDQN(state_size, action_size, 0,n_fc1,n_fc2,af_1,af_2,device)
+        dqn_agent.q_network.load_state_dict(torch.load('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth'))
         print("Model already trained!")
-        pass
+    except:
+        if ncm_flag == 0:
+            solved_flag = 0
+            arch = str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2)
+            start = time()
+            scores = []
+            scores_window = deque(maxlen=100)
+            eps = EPS_START
+            for episode in tqdm(range(1, MAX_EPISODES + 1)):
+                state = env.reset()
+                score = 0
+                for t in range(MAX_STEPS):
+                    action = dqn_agent.epsilor_greedy_act(state, eps)
+                    next_state, reward, done, info = env.step(action)
+                    dqn_agent.step(state, action, reward, next_state, done)
+                    state = next_state
+                    score += reward
+                    if done:
+                        break
+
+                    eps = max(eps * EPS_DECAY, EPS_MIN)
+                    if episode % PRINT_EVERY == 0:
+                        mean_score = np.mean(scores_window)
+                        print('\r{} architecture Progress {}/{}, average score:{:.2f}'.format(arch,episode, MAX_EPISODES, mean_score), end="")
+                    if score >= ENV_SOLVED:
+                        solved_flag = 1
+                        mean_score = np.mean(scores_window)
+                        print('\r{} architecture Environment solved in {} episodes, average score: {:.2f}'.format(arch,episode, mean_score), end="")
+                        sys.stdout.flush()
+                        dqn_agent.checkpoint('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth')
+                        break
+
+                scores_window.append(score)
+                scores.append(score)
+            end = time()
+            print('Took {} seconds'.format(end - start))
+            time_taken = end - start
+            if solved_flag ==0:
+                f=open("non_converging_models.txt","a")
+                f.write(str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2)+'\n')
+                f.close()
+            return time_taken
+        else:
+            pass
+
+
 
 
 # In[16]:
@@ -397,11 +415,10 @@ def test(n_fc1,n_fc2,af_1,af_2,mm):
         print("Average_Score = ",total_score/500)
         f = open("logger_results_enas.txt",'a')
         f.write('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'\t'+str(total_score/500)+'\t'+'\n')
-        score_component = (total_score/500)/300
+        score_component = (total_score/500)/30
         #time_component = (time/3500)
         return score_component
     except:
         print("--Didn't converge--")
-        return 0.000001
-
+        return 0.00001
 # In[ ]:

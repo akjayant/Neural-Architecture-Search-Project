@@ -8,6 +8,22 @@ import Lunar_pytorch_enas
 #from pexecute.process import ProcessLoom
 from multiprocessing import Pool
 import multiprocessing as mp
+import pickle
+
+
+def load_pickle(pkl_name):
+    readfile = open(pkl_name, 'rb')
+    model = pickle.load(readfile)
+    return model
+
+def dump_pickle(obj,name):
+    file = open(name+str('.pkl'), 'wb')
+    pickle.dump(obj, file)
+
+
+
+
+
 
 def detach(h):
     if type(h) == Variable:
@@ -80,19 +96,22 @@ class Controller(nn.Module):
             probs = F.softmax(logits, dim=-1)
             log_prob = F.log_softmax(logits, dim=-1)
             action = probs.multinomial(num_samples=1).data
-            #print(action)
+     
             mode = i % 2
+      # 'mode' controls whether you choose dense layer type or activation function type
+      # We have created a lookup embedding table of 12*100  , dense selection has 4 choices so it will choose from first 4 rows otheriwise if activation choice
+      # i.e, 2 choices , it will choose from 5 or 6. (yes rest of 6 rows are useless :p)
             inputs = get_variable(
-                 action[:, 0] ,
+                 action[:, 0] + sum(self.decoder_order[:mode]),
                  requires_grad=False)
 
             if mode == 0:
-                 activations.append(action[:, 0])
-            elif mode == 1:
                  dense_layer_type.append(action[:, 0])
+            elif mode == 1:
+                 activations.append(action[:, 0])
 
         #print(activations,dense_layer_type,log_prob)
-        return [activations,dense_layer_type,log_prob]
+        return [dense_layer_type,activations,log_prob]
 
 
 #-------------------ENAS DRIVER---------------------------
@@ -105,14 +124,15 @@ class ENAS():
         self.controller_optim = torch.optim.Adam(self.controller_model.parameters(),lr=.055)
         self.samples_per_policy = 4
     def train(self):
-        reward_history = []
-        adv_history = []
+        reward_history = [0]
+        adv_history = [0]
         for ep in range(self.epochs):
             import Lunar_pytorch_enas
             print("---------------EPOCH--"+str(ep)+"---------------")
             samples = []
             for m in range(self.samples_per_policy):
                 s = self.controller_model.sample()
+                print(s)
                 n_fc1 = dense_layer_list[s[0][0].item()]
                 n_fc2 = dense_layer_list[s[0][1].item()]
                 af_1 = s[1][0].item()
@@ -145,25 +165,16 @@ class ENAS():
                 reward_i = reward_epoch[m]
                 reward_history.append(reward_i)
                 print("Reward = ",reward_i)
-
-
                 if self.baseline is None:
-                    self.baseline = reward_i
+                    self.baseline = 0
                 else:
-                    decay = 0.95
-                    self.baseline = decay * self.baseline + (1 - decay) * reward_i
-
-
+                    decay = 0.999
+                    self.baseline = (1-decay) * (self.baseline - reward_i)
                 adv = reward_i - self.baseline
                 adv_history.append(adv)
-
-                # policy loss
                 log_probs = s[2]
-                loss = -log_probs*get_variable(torch.tensor(float(adv)),
-                                                     requires_grad=True)
-
-
-                loss = loss.sum()  # or loss.mean()
+                loss = -log_probs*get_variable(torch.tensor(float(adv)),requires_grad=True)
+                loss = loss.sum()
 
             # update
             loss  = loss/self.samples_per_policy
@@ -178,3 +189,4 @@ if __name__ == "__main__":
     dense_layer_list = [64,128,256,1024,2048]
     e = ENAS(args,50)
     e.train()
+    dump_pickle(e,"50_iters_enas")
