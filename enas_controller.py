@@ -130,7 +130,7 @@ class ENAS():
 
             output =  loom.execute()
             for m in range(self.samples_per_policy):
-                a,b,c,d = samples[m]
+                a,b,c,d,_ = samples[m]
                 reward_i = Lunar_pytorch_enas.test(a,b,c,d)
                 reward_history.append(reward_i)
                 print("Reward = ",reward_i)
