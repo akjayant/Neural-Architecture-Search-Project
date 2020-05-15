@@ -91,12 +91,13 @@ class Controller(nn.Module):
         dense_layer_type = []
         inputs = self.static_input
         hidden = self.static_init_hidden
+        log_probs = []
         for i in range(2*self.args['n_blocks']):
             logits, hidden = self.forward(inputs,hidden,i,i==0)
             probs = F.softmax(logits, dim=-1)
             log_prob = F.log_softmax(logits, dim=-1)
             action = probs.multinomial(num_samples=1).data
-     
+            selected_log_prob = log_prob.gather(1,get_variable(action,requires_grad=False))
             mode = i % 2
       # 'mode' controls whether you choose dense layer type or activation function type
       # We have created a lookup embedding table of 12*100  , dense selection has 4 choices so it will choose from first 4 rows otheriwise if activation choice
@@ -109,9 +110,10 @@ class Controller(nn.Module):
                  dense_layer_type.append(action[:, 0])
             elif mode == 1:
                  activations.append(action[:, 0])
+            log_probs.append(selected_log_prob[:,0])
 
         #print(activations,dense_layer_type,log_prob)
-        return [dense_layer_type,activations,log_prob]
+        return [dense_layer_type,activations,torch.cat(log_probs)]
 
 
 #-------------------ENAS DRIVER---------------------------
@@ -169,7 +171,7 @@ class ENAS():
                     self.baseline = 0
                 else:
                     decay = 0.999
-                    self.baseline = (1-decay) * (self.baseline - reward_i)
+                    self.baseline = (1-decay) * (self.baseline) + decay*reward_i
                 adv = reward_i - self.baseline
                 adv_history.append(adv)
                 log_probs = s[2]
