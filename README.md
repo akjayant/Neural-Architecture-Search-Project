@@ -1,2 +1,3 @@
 # Neural-Architecture-Search-Project
-WIP &lt;just resources>
+Run to search - 
+python enas_contoller.py 
