@@ -27,7 +27,7 @@ def set_env_seed(x):
 # In[4]:
 
 def set_device():
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
     print("RUNNING ON ",device)
     return device
 
@@ -37,7 +37,7 @@ def set_device():
 class QNet(nn.Module):
     def __init__(self, state_size, action_size, seed,n_fc1,n_fc2,af1,af2):
         super(QNet, self).__init__()
-        self.seed = torch.manual_seed(seed)
+        torch.manual_seed(seed)
         self.n_fc1 = n_fc1
         self.n_fc2 = n_fc2
         self.fc1 = nn.Linear(state_size, self.n_fc1)
@@ -104,24 +104,31 @@ class DDQN:
         self.device = device
         self.state_size = state_size
         self.action_size = action_size
-        self.seed = random.seed(seed)
+        self.seed = seed
         #--------Initialize Q and Fixed Q networks with same architecture---------
         print("Device check - ",self.device)
         self.q_network = QNet(state_size, action_size, seed, n_fc1, n_fc2,af_1,af_2).to(self.device)
         print("Training....",self.q_network)
         self.fixed_network = QNet(state_size, action_size, seed, n_fc1, n_fc2,af_1,af_2).to(self.device)
+        self.flag_1 = 0
+        self.flag_2 = 0
         print("------------Initializing if some warm start is present.......")
         try:
-            fc1_weight = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_weight")
+            fc1_weight = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_weight.pkl")
+            #print(fc1_weight)
             fc1_bias = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_bias.pkl")
             print("Shared weight fc1 history found {}_{}".format(n_fc1,af_1))
+            self.flag_1 = 1
             with torch.no_grad():
                 self.q_network.fc1.weight.copy_(fc1_weight)
                 self.q_network.fc1.bias.copy_(fc1_bias)
+                #print("Copied to Q L1")
+                #print(self.q_network.fc1.weight)
                     # self.q_network.fc2.weight.copy_(fc2_weight)
                     # self.q_network.fc2.bias.copy_(fc2_bias)
                 self.fixed_network.fc1.weight.copy_(fc1_weight)
                 self.fixed_network.fc1.bias.copy_(fc1_bias)
+                print("Copied to fixed Q L1")
                     # self.fixed_network.fc2.weight.copy_(fc2_weight)
                     # self.fixed_network.fc2.bias.copy_(fc2_bias)
         except:
@@ -131,25 +138,29 @@ class DDQN:
             fc2_weight = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_weight.pkl")
             fc2_bias = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_bias.pkl")
             print("Shared weight fc2 history found {}_{}".format(n_fc2,af_2 ))
+            self.flag_2 = 1
             with torch.no_grad():
                 # self.q_network.fc1.weight.copy_(fc1_weight)
                 # self.q_network.fc1.bias.copy_(fc1_bias)
                 self.q_network.fc2.weight.copy_(fc2_weight)
                 self.q_network.fc2.bias.copy_(fc2_bias)
+                print("Copied to Q L2")
                 # self.fixed_network.fc1.weight.copy_(fc1_weight)
                 # self.fixed_network.fc1.bias.copy_(fc1_bias)
                 self.fixed_network.fc2.weight.copy_(fc2_weight)
                 self.fixed_network.fc2.bias.copy_(fc2_bias)
+                print("Copied to fiexed Q L2")
         except:
             print("No layer 2 shared history found {}_{}".format(n_fc2,af_2))
             pass
 
 
 
-
-        self.optimizer = optim.Adam(self.q_network.parameters())
-        self.memory = ExperienceReplays(BUFFER_SIZE, BATCH_SIZE, seed, self.device)  #alloting memory for experience buffer
-        self.timestep = 0
+        if self.flag_1==0 or self.flag_2==0:
+            self.optimizer = optim.Adam(self.q_network.parameters())
+            self.memory = ExperienceReplays(BUFFER_SIZE, BATCH_SIZE, seed, self.device)  #alloting memory for experience buffer
+            self.timestep = 0
+        #return flag_1,flag_2
 
 
     def step(self, state, action, reward, next_state, done):
@@ -258,45 +269,55 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     env = set_env_seed(env_seed)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
+    cuda_flag=0
+    while cuda_flag==0:
 
-    device = set_device()
+        device = torch.device('cuda:0')
+        cuda_flag=1
+
+
+
     print("Device initialised - ", device)
     dqn_agent = DDQN(state_size, action_size, 0,n_fc1,n_fc2,af_1,af_2,device)
-    arch = str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2)
-    start = time()
-    scores = []
-    scores_window = deque(maxlen=100)
-    eps = EPS_START
-    for episode in tqdm(range(1, MAX_EPISODES + 1)):
-        state = env.reset()
-        score = 0
-        for t in range(MAX_STEPS):
-            action = dqn_agent.epsilor_greedy_act(state, eps)
-            next_state, reward, done, info = env.step(action)
-            dqn_agent.step(state, action, reward, next_state, done)
-            state = next_state
-            score += reward
-            if done:
-                break
+    if dqn_agent.flag_1 == 0 or dqn_agent.flag_2==0:
+        arch = str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2)
+        start = time()
+        scores = []
+        scores_window = deque(maxlen=100)
+        eps = EPS_START
+        for episode in tqdm(range(1, MAX_EPISODES + 1)):
+            state = env.reset()
+            score = 0
+            for t in range(MAX_STEPS):
+                action = dqn_agent.epsilor_greedy_act(state, eps)
+                next_state, reward, done, info = env.step(action)
+                dqn_agent.step(state, action, reward, next_state, done)
+                state = next_state
+                score += reward
+                if done:
+                    break
 
-            eps = max(eps * EPS_DECAY, EPS_MIN)
-            if episode % PRINT_EVERY == 0:
-                mean_score = np.mean(scores_window)
-                print('\r{} architecture Progress {}/{}, average score:{:.2f}'.format(arch,episode, MAX_EPISODES, mean_score), end="")
-            if score >= ENV_SOLVED:
-                mean_score = np.mean(scores_window)
-                print('\r{} architecture Environment solved in {} episodes, average score: {:.2f}'.format(arch,episode, mean_score), end="")
-                sys.stdout.flush()
-                dqn_agent.checkpoint('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth')
-                break
+                eps = max(eps * EPS_DECAY, EPS_MIN)
+                if episode % PRINT_EVERY == 0:
+                    mean_score = np.mean(scores_window)
+                    print('\r{} architecture Progress {}/{}, average score:{:.2f}'.format(arch,episode, MAX_EPISODES, mean_score), end="")
+                if score >= ENV_SOLVED:
+                    mean_score = np.mean(scores_window)
+                    print('\r{} architecture Environment solved in {} episodes, average score: {:.2f}'.format(arch,episode, mean_score), end="")
+                    sys.stdout.flush()
+                    dqn_agent.checkpoint('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth')
+                    break
 
-        scores_window.append(score)
-        scores.append(score)
+            scores_window.append(score)
+            scores.append(score)
 
-    end = time()
-    print('Took {} seconds'.format(end - start))
-    time_taken = end - start
-    return time_taken
+        end = time()
+        print('Took {} seconds'.format(end - start))
+        time_taken = end - start
+        return time_taken
+    else:
+        print("Model already trained!")
+        pass
 
 
 # In[16]:
@@ -343,7 +364,7 @@ def dump_pickle(obj,name):
     pickle.dump(obj, file)
 
 #--------------TESTING------------------------------------------------------------------------------
-def test(n_fc1,n_fc2,af_1,af_2):
+def test(n_fc1,n_fc2,af_1,af_2,mm):
     try:
         device = set_device()
         dqn_agent = DDQN(8,4, 0,n_fc1,n_fc2,af_1,af_2,device)

@@ -5,7 +5,9 @@ import torch.nn.functional as F
 import numpy as np
 from torch.autograd import Variable
 import Lunar_pytorch_enas
-from pexecute.process import ProcessLoom
+#from pexecute.process import ProcessLoom
+from multiprocessing import Pool
+import multiprocessing as mp
 
 def detach(h):
     if type(h) == Variable:
@@ -100,12 +102,13 @@ class ENAS():
         self.controller_model = Controller(args)
         self.epochs = epochs
         self.baseline = None
-        self.controller_optim = torch.optim.Adam(self.controller_model.parameters(),lr=.035)
+        self.controller_optim = torch.optim.Adam(self.controller_model.parameters(),lr=.055)
         self.samples_per_policy = 4
     def train(self):
         reward_history = []
         adv_history = []
         for ep in range(self.epochs):
+            import Lunar_pytorch_enas
             print("---------------EPOCH--"+str(ep)+"---------------")
             samples = []
             for m in range(self.samples_per_policy):
@@ -114,7 +117,7 @@ class ENAS():
                 n_fc2 = dense_layer_list[s[0][1].item()]
                 af_1 = s[1][0].item()
                 af_2 = s[1][1].item()
-                samples.append([n_fc1,n_fc2,af_1,af_2,0])
+                samples.append((n_fc1,n_fc2,af_1,af_2,0))
             #print(n_fc1,n_fc2,af_1,af_2)
             print("Reference - ")
             print(activation_function_list)
@@ -122,23 +125,18 @@ class ENAS():
             print("Training architecture -",samples)
             #time_taken = Lunar_pytorch_enas.train_dqn(n_fc1,n_fc2,af_1,af_2,0)
             print("-----------Training 4 architectures in parallel for a given policy----------------")
-            loom = ProcessLoom(max_runner_cap = 4)
-            loom.add_function(Lunar_pytorch_enas.train_dqn,samples[0],{})
-            loom.add_function(Lunar_pytorch_enas.train_dqn,samples[1],{})
-            loom.add_function(Lunar_pytorch_enas.train_dqn,samples[2],{})
-            loom.add_function(Lunar_pytorch_enas.train_dqn,samples[3],{})
+            processes = []
+            mp.set_start_method("spawn",force=True)
+            with Pool(self.samples_per_policy) as p:
+                p.starmap(Lunar_pytorch_enas.train_dqn,samples)
 
-            output =  loom.execute()
-            del loom
-            loom1 = ProcessLoom(max_runner_cap = 4)
-            loom1.add_function(Lunar_pytorch_enas.test,samples[0][:4],{})
-            loom1.add_function(Lunar_pytorch_enas.test,samples[1][:4],{})
-            loom1.add_function(Lunar_pytorch_enas.test,samples[2][:4],{})
-            loom1.add_function(Lunar_pytorch_enas.test,samples[3][:4],{})
-            output_rewards = loom1.execute()
-            reward_epoch = [output_rewards[0]['output'],output_rewards[1]['output'],output_rewards[2]['output'],output_rewards[3]['output']]
-            del loom1
+            p.close()
+            output_rewards = []
+            with Pool(self.samples_per_policy) as p:
+                output = p.starmap(Lunar_pytorch_enas.test,samples)
 
+            p.close()
+            reward_epoch = output
 
 
 
