@@ -1,3 +1,23 @@
 # Neural-Architecture-Search-Project
-Run to search - 
-python enas_contoller.py 
+This is an attempt of Neural Architecture in Deep Reinforcement Learning and for a start we tried it with Lunar Lander and DDQN network approximation. We are using ENAS by Google Brain for this. [Paper link](https://arxiv.org/abs/1802.03268)
+
+### Environment - Open AI GYM's Lunar-Lander-v2 
+Enviroment is solved if you reach 200 score
+### Run to search
+
+    python enas_contoller.py 
+
+### Impact of architecture complexity and choice of activation functions on DDQN learning
+*have been tested across various enviornment seeds
+#### Low complexity and choice of activation function effects stability of training & convergence - 
+1) 32,relu,64,relu
+![p](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/impact_of_architecture_choice_ddqn_results/model_env_seed_3/solved_200_32_64_3.png)
+2) 1024,sigmoid,1024,sigmoid
+![q](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/impact_of_architecture_choice_ddqn_results/model_env_seed_4_sigmoid/solved_200_1024_1024_4.png)
+
+#### Good architecture example - 
+1) (1024,relu,1024,relu)
+![w](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/impact_of_architecture_choice_ddqn_results/model_env_seed_4/solved_200_1024_1024_4.png)
+#### Overly complex architectures are also not good and some times take too much time to train
+2) (2048,relu,2048,relu)
+![rr](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/impact_of_architecture_choice_ddqn_results/model_env_seed_4/solved_200_2048_2048_4.png)
