@@ -112,12 +112,12 @@ class DDQN:
         self.fixed_network = QNet(state_size, action_size, seed, n_fc1, n_fc2,af_1,af_2).to(self.device)
         #self.flag_1 = 0
         #self.flag_2 = 0
-        print("------------Initializing if some warm start is present.......")
+        #print("------------Initializing if some warm start is present.......")
         try:
             fc1_weight = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_weight.pkl")
             #print(fc1_weight)
             fc1_bias = load_pickle(str(n_fc1)+"_"+str(af_1)+"fc1_bias.pkl")
-            print("Shared weight fc1 history found {}_{}".format(n_fc1,af_1))
+            #print("Shared weight fc1 history found {}_{}".format(n_fc1,af_1))
             #self.flag_1 = 1
             with torch.no_grad():
                 self.q_network.fc1.weight.copy_(fc1_weight)
@@ -128,30 +128,30 @@ class DDQN:
                     # self.q_network.fc2.bias.copy_(fc2_bias)
                 self.fixed_network.fc1.weight.copy_(fc1_weight)
                 self.fixed_network.fc1.bias.copy_(fc1_bias)
-                print("Copied to fixed Q L1")
+                #print("Copied to fixed Q L1")
                     # self.fixed_network.fc2.weight.copy_(fc2_weight)
                     # self.fixed_network.fc2.bias.copy_(fc2_bias)
         except:
-            print("No layer 1 shared history found {}_{}".format(n_fc1,af_1))
+            #print("No layer 1 shared history found {}_{}".format(n_fc1,af_1))
             pass
         try:
             fc2_weight = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_weight.pkl")
             fc2_bias = load_pickle(str(n_fc2)+"_"+str(af_2)+"fc2_bias.pkl")
-            print("Shared weight fc2 history found {}_{}".format(n_fc2,af_2 ))
+            #print("Shared weight fc2 history found {}_{}".format(n_fc2,af_2 ))
             #self.flag_2 = 1
             with torch.no_grad():
                 # self.q_network.fc1.weight.copy_(fc1_weight)
                 # self.q_network.fc1.bias.copy_(fc1_bias)
                 self.q_network.fc2.weight.copy_(fc2_weight)
                 self.q_network.fc2.bias.copy_(fc2_bias)
-                print("Copied to Q L2")
+                #print("Copied to Q L2")
                 # self.fixed_network.fc1.weight.copy_(fc1_weight)
                 # self.fixed_network.fc1.bias.copy_(fc1_bias)
                 self.fixed_network.fc2.weight.copy_(fc2_weight)
                 self.fixed_network.fc2.bias.copy_(fc2_bias)
-                print("Copied to fiexed Q L2")
+                #print("Copied to fiexed Q L2")
         except:
-            print("No layer 2 shared history found {}_{}".format(n_fc2,af_2))
+            #print("No layer 2 shared history found {}_{}".format(n_fc2,af_2))
             pass
 
 
@@ -333,6 +333,7 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
                 f.close()
             return time_taken
         else:
+            print("non converging model")
             pass
 
 

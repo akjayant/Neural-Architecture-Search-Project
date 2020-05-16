@@ -130,11 +130,11 @@ class ENAS():
         adv_history = [0]
         for ep in range(self.epochs):
             import Lunar_pytorch_enas
-            print("---------------EPOCH--"+str(ep)+"---------------")
+            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<---------------EPOCH--"+str(ep)+"-------------------------------->>>>>>>>>>>>>>>>>>>>>>>")
             samples = []
             for m in range(self.samples_per_policy):
                 s = self.controller_model.sample()
-                print(s)
+                #print(s)
                 n_fc1 = dense_layer_list[s[0][0].item()]
                 n_fc2 = dense_layer_list[s[0][1].item()]
                 af_1 = s[1][0].item()
@@ -183,6 +183,8 @@ class ENAS():
             self.controller_optim.zero_grad()
             loss.backward()
             self.controller_optim.step()
+            #f = open("Loss.txt","a")
+            #f.write(str(loss)+'\n')
             print(loss)
 
 if __name__ == "__main__":
