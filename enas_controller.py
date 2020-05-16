@@ -126,6 +126,8 @@ class ENAS():
         self.controller_optim = torch.optim.Adam(self.controller_model.parameters(),lr=.055)
         self.samples_per_policy = 4
     def train(self):
+        convergence_count = 0
+        loss_tracker = []
         reward_history = [0]
         adv_history = [0]
         for ep in range(self.epochs):
@@ -161,31 +163,40 @@ class ENAS():
             reward_epoch = output
 
 
-
+            epoch_average_reward_tracker = []
             for m in range(self.samples_per_policy):
                 #a,b,c,d,_ = samples[m]
                 reward_i = reward_epoch[m]
+                epoch_average_reward_tracker.append(reward_i*30)
                 reward_history.append(reward_i)
                 print("Reward = ",reward_i)
+                #exponential moving average of previous rewards
                 if self.baseline is None:
-                    self.baseline = 0
+                    self.baseline = reward_i
                 else:
                     decay = 0.999
-                    self.baseline = (1-decay) * (self.baseline) + decay*reward_i
+                    self.baseline = (decay) * (self.baseline) + (1-decay)*reward_i
                 adv = reward_i - self.baseline
                 adv_history.append(adv)
                 log_probs = s[2]
                 loss = -log_probs*get_variable(torch.tensor(float(adv)),requires_grad=True)
                 loss = loss.sum()
 
-            # update
+            
             loss  = loss/self.samples_per_policy
             self.controller_optim.zero_grad()
             loss.backward()
             self.controller_optim.step()
-            #f = open("Loss.txt","a")
-            #f.write(str(loss)+'\n')
-            print(loss)
+            f = open("controller_performance_tracker_run_2.txt","a")
+            f.write(str(sum(epoch_average_reward_tracker)/len(epoch_average_reward_tracker))+'\n')
+            f.close()
+            loss_tracker.append(loss)
+            if ep>25:
+                prev_10_losses = loss_tracker[-10:]
+                if sum(prev_10_losses)/10 == 0:
+                    break
+            print("Contoller Loss=",loss)
+        print("Best model : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
 
 if __name__ == "__main__":
     args = {'n_dense_layer':5,'n_activation_functions':2,'controller_hid':100,'n_blocks':2}
