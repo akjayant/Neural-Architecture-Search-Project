@@ -4,11 +4,15 @@ This is an attempt of Neural Architecture Search in Deep Reinforcement Learning 
  modified DDQN with manual weights initialisation.
 ### Environment - Open AI GYM's Lunar-Lander-v2 
     Enviroment is solved if you reach 200 score for 100 episodes!
-### ENAS Search Space - 
+
+### ENAS Search Space : We will search for best two layered feed forward nn possible from search space - 
 Two layered feedforward neural networks  possible from dense layers of sizes (128,256,1024,2048) and activation functions (sigmoid,relu)
 ### Run to search
     python enas_contoller.py 
-### Directly see out best model performing (and it has different test env seed not the one we used for validation!)-
+    
+### Directly see out best model performing (and it has different test env seed not the one we used for validation!)
+   In our case this comes out to be (2048,sigmoid,256,relu).
+   
     cd best_model
     python play_lunar_video.py 
     
