@@ -1,6 +1,8 @@
 # Neural-Architecture-Search-on-Deep-Reinforcement-Learning
-This is an attempt of Neural Architecture Search in Deep Reinforcement Learning and for a start we tried it with Lunar Lander and DDQN network approximation. We are implementing ENAS by Google Brain for this. [Paper link](https://arxiv.org/abs/1802.03268)
- *Also this [DDQN Tutorial](https://www.katnoria.com/nb_dqn_lunar/) was extremely helpful!
+This is an attempt of Neural Architecture Search in Deep Reinforcement Learning and for a start we tried it with Lunar Lander and DDQN network approximation. 
+1. Reinforce rule with baseline for purpose of loss function from this paper on NAS [Paper link](https://arxiv.org/pdf/1611.01578)
+2. We are implementing ENAS by Google Brain for this. [Paper link](https://arxiv.org/abs/1802.03268)
+3. Also this [DDQN Tutorial](https://www.katnoria.com/nb_dqn_lunar/) was extremely helpful!
  We have modified DDQN with manual weights initialisation which is key in ENAS.
 ### Environment - Open AI GYM's Lunar-Lander-v2 
     Enviroment is solved if you reach 200 score for 100 episodes!
