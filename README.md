@@ -13,8 +13,13 @@ Two layered feedforward neural networks  possible from dense layers of sizes (64
 2. If  model doesn't converge, reward = 1e-5
 ### Convergence - 
 In our example after 20-22 iterations it starts sampling  set of  only good performing architectures since our controller sampling policy is imporved.Their performance will be comparable. We don't get a single best model obviously because our policy is stochastic and its higly unlikely that it will sample one best model after the end of training.
+Plot - 
 ![plot](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/controller_performance.png)
 
+### Time Taken - 
+~12 hrs on single NVIDIA GTx 1050 Ti  
+(exhaustive search would have taken ~18-20 hrs)
+Advantage is not quite big here because this is a simple example with search space including just 100 architectures, however this difference would have been huge if search space was big itself.
 ### Run to search
     python enas_contoller.py 
     
