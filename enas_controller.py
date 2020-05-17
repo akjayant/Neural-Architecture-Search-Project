@@ -196,7 +196,7 @@ class ENAS():
                 if sum(prev_10_losses)/10 == 0:
                     break
             print("Contoller Loss=",loss)
-        print("Best model : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
+        #print("Best model : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
 
 if __name__ == "__main__":
     args = {'n_dense_layer':5,'n_activation_functions':2,'controller_hid':100,'n_blocks':2}
