@@ -23,7 +23,8 @@ Plot -
 (exhaustive search would have taken ~18-20 hrs)
 Advantage is not quite big here because this is a simple example with search space including just 100 architectures, however this difference would have been huge if search space was big itself.
 ### Run to search
-    python enas_contoller.py 
+    python enas_contoller.py
+    python plot_controller_performance.py
     
 ### Directly see out one of the best model performing i.e, controller samples one of this at end of training (and it has different test env seed not the one we used for validation!)
 
