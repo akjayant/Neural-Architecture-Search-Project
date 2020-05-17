@@ -9,15 +9,17 @@ This is an attempt of Neural Architecture Search in Deep Reinforcement Learning 
 Two layered feedforward neural networks  possible from dense layers of sizes (64,128,256,1024,2048) and activation functions (sigmoid,relu)
 ### Reward -
 (Didn't do much tuning into this, kind of arbitirary except that I have used average score/30 for normalisation purpose)
-If the model converged then that trained model is run on different env seed for 500 episodes and average score is calculated,
-reward = average_score/30
-If  model doesn't converge 
-reward = 1e-5
+1. If the model converged then that trained model is run on different env seed for 500 episodes and average score is calculated, reward = average_score/30
+2. If  model doesn't converge, reward = 1e-5
+### Convergence - 
+In our example after 20-22 iterations it starts sampling  set of  only good performing architectures since our controller sampling policy is imporved.Their performance will be comparable. We don't get a single best model obviously because our policy is stochastic and its higly unlikely that it will sample one best model after the end of training.
+![plot](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/controller_performance.png)
+
 ### Run to search
     python enas_contoller.py 
     
-### Directly see out best model performing (and it has different test env seed not the one we used for validation!)
-   In our case this comes out to be (2048,sigmoid,256,relu).
+### Directly see out one of the best model performing i.e, controller samples one of this at end of training (and it has different test env seed not the one we used for validation!)
+   (256,relu,256,relu)-
    
     cd best_model
     python play_lunar_video.py 
