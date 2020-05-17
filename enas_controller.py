@@ -182,21 +182,27 @@ class ENAS():
                 loss = -log_probs*get_variable(torch.tensor(float(adv)),requires_grad=True)
                 loss = loss.sum()
 
-            
+
             loss  = loss/self.samples_per_policy
             self.controller_optim.zero_grad()
             loss.backward()
             self.controller_optim.step()
             f = open("controller_performance_tracker_run_2.txt","a")
+            rewards_history = f.readlines()
             f.write(str(sum(epoch_average_reward_tracker)/len(epoch_average_reward_tracker))+'\n')
             f.close()
             loss_tracker.append(loss)
+            #Convergence Condition--------------
             if ep>25:
-                prev_10_losses = loss_tracker[-10:]
-                if sum(prev_10_losses)/10 == 0:
+                rewards_history = [float(i) for i in rewards_history]
+                prev_7_rewards = np.array(rewards_history[-7:])
+                if prev_7_rewards.var()<20 and prev_7_rewards.mean()>220:
                     break
             print("Contoller Loss=",loss)
-        print("Best model : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
+        print("One of the good models : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
+        print("One of the good models : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
+        print("One of the good models : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
+        print("One of the good models : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
 
 if __name__ == "__main__":
     args = {'n_dense_layer':5,'n_activation_functions':2,'controller_hid':100,'n_blocks':2}
