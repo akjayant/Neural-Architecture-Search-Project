@@ -12,7 +12,7 @@ Two layered feedforward neural networks  possible from dense layers of sizes (64
 1. If the model converged then that trained model is run on different env seed for 500 episodes and average score is calculated, reward = average_score/30
 2. If  model doesn't converge, reward = 1e-5
 ### Convergence - 
-In our example after 20-22 iterations it starts sampling  set of  only good performing architectures since our controller sampling policy is imporved.Their performance will be comparable. We don't get a single best model obviously because our policy is stochastic and its higly unlikely that it will sample one best model after the end of training.
+In our example after ~15 iterations it starts sampling  set of  only good performing architectures since our controller sampling policy is imporved.Their performance will be comparable. We don't get a single best model obviously because our policy is stochastic and its higly unlikely that it will sample one best model after the end of training.
 Plot - 
 ![plot](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/controller_performance.png)
 
