@@ -1,20 +1,20 @@
 # Neural-Architecture-Search-on-Deep-Reinforcement-Learning
-This is an attempt of Neural Architecture Search in Deep Reinforcement Learning and for a start we tried it with Lunar Lander and DDQN network approximation. 
+This is an attempt of Neural Architecture Search in Deep Reinforcement Learning and for a start I tried it with Lunar Lander and DDQN network approximation. 
 1. Reinforce rule with baseline for purpose of loss function from this paper on NAS [Paper link](https://arxiv.org/pdf/1611.01578)
-2. We are implementing ENAS by Google Brain for this. [Paper link](https://arxiv.org/abs/1802.03268)
+2. Implementing ENAS by Google Brain for this. [Paper link](https://arxiv.org/abs/1802.03268)
 3. Also this [DDQN Tutorial](https://www.katnoria.com/nb_dqn_lunar/) was extremely helpful!
- We have modified DDQN with manual weights initialisation which is key in ENAS.
+4. Have modified DDQN with manual weights initialisation which is key in ENAS.
 ### Environment - Open AI GYM's Lunar-Lander-v2 
     Enviroment is solved if you reach 200 score for 100 episodes!
 
-### ENAS Search Space : We will search for best two layered feed forward nn possible from search space - 
+### ENAS Search Space : Search for best two layered feed forward nn possible from search space - 
 Two layered feedforward neural networks with no skip connections  possible from dense layers of sizes (64,128,256,1024,2048) and activation functions (sigmoid,relu) => 100 architectures
 ### Reward -
 (Didn't do much tuning into this, kind of arbitirary except that I have used average score/30 for normalisation purpose)
 1. If the model converged then that trained model is run on different env seed for 500 episodes and average score is calculated, reward = average_score/30
 2. If  model doesn't converge, reward = 1e-5
 ### Convergence - 
-In our example after ~15 iterations it starts sampling  set of  only good performing architectures since our controller sampling policy is improved.Their performance will be comparable. We don't get a single best model obviously because our policy is stochastic and its higly unlikely that it will sample one best model after the end of training.
+In our example after ~15 iterations it starts sampling  set of  only good performing architectures since our controller sampling policy is improved.Their performance will be comparable. I don't get a single best model obviously because our policy is stochastic and its higly unlikely that it will sample one best model after the end of training.
 Plot - 
 ![plot](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/controller_performance.png)
 
