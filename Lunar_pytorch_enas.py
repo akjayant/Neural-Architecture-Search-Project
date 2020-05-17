@@ -399,24 +399,39 @@ def test(n_fc1,n_fc2,af_1,af_2,mm):
         print("Calculating reward......")
         env = set_env_seed(799)
         total_score = 0
+        r_dict = load_pickle("reward_dict.pkl")
+        search_key = str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)
+        if  search_key in r_dict.keys():
+            avg_score = r_dict[search_key]
 
-        for i in range(500):
-            score = 0
-            state = env.reset()
-            while True:
 
-                action = dqn_agent.epsilor_greedy_act(state)
-                next_state, reward, done, info = env.step(action)
-                state = next_state
-                score += reward
-                if done:
-                    break
-            total_score+=score
-                #print('episode: {} scored {}'.format(i, score))
-        print("Average_Score = ",total_score/500)
-        f = open("logger_results_enas.txt",'a')
-        f.write('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'\t'+str(total_score/500)+'\t'+'\n')
-        score_component = (total_score/500)/30
+        else:
+            for i in range(500):
+                score = 0
+                state = env.reset()
+                while True:
+
+                    action = dqn_agent.epsilor_greedy_act(state)
+                    next_state, reward, done, info = env.step(action)
+                    state = next_state
+                    score += reward
+                    if done:
+                        break
+                total_score+=score
+                    #print('episode: {} scored {}'.format(i, score))
+            avg_score = total_score/500
+            print("Average_Score = ",avg_score)
+            f = open("logger_results_enas.txt",'a')
+            f.write('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'\t'+str(total_score/500)+'\t'+'\n')
+            
+            #r_dict = load_pickle("reward_dict.pkl")
+            search_key = str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)
+            r_dict[search_key] = avg_score
+            dump_pickle(r_dict,"reward_dict")
+
+
+
+        score_component = abs((avg_score)/30)
         #time_component = (time/3500)
         return score_component
     except:

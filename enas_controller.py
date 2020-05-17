@@ -123,8 +123,8 @@ class ENAS():
         self.controller_model = Controller(args)
         self.epochs = epochs
         self.baseline = None
-        self.controller_optim = torch.optim.Adam(self.controller_model.parameters(),lr=.055)
-        self.samples_per_policy = 4
+        self.controller_optim = torch.optim.Adam(self.controller_model.parameters(),lr=.0085)
+        self.samples_per_policy = 5
     def train(self):
         convergence_count = 0
         loss_tracker = []
@@ -148,7 +148,7 @@ class ENAS():
             print(dense_layer_list)
             print("Training architecture -",samples)
             #time_taken = Lunar_pytorch_enas.train_dqn(n_fc1,n_fc2,af_1,af_2,0)
-            print("-----------Training 4 architectures in parallel for a given policy----------------")
+            print("-----------Training 5 architectures in parallel for a given policy----------------")
             processes = []
             mp.set_start_method("spawn",force=True)
             with Pool(self.samples_per_policy) as p:
