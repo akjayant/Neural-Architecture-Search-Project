@@ -6,7 +6,7 @@ This is an attempt of Neural Architecture Search in Deep Reinforcement Learning 
     Enviroment is solved if you reach 200 score for 100 episodes!
 
 ### ENAS Search Space : We will search for best two layered feed forward nn possible from search space - 
-Two layered feedforward neural networks  possible from dense layers of sizes (64,128,256,1024,2048) and activation functions (sigmoid,relu)
+Two layered feedforward neural networks  possible from dense layers of sizes (64,128,256,1024,2048) and activation functions (sigmoid,relu) => 100 architectures
 ### Reward -
 (Didn't do much tuning into this, kind of arbitirary except that I have used average score/30 for normalisation purpose)
 1. If the model converged then that trained model is run on different env seed for 500 episodes and average score is calculated, reward = average_score/30
