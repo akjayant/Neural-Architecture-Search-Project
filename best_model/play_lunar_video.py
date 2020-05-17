@@ -296,7 +296,7 @@ if env:
 # In[30]:
 
 total_score = 0
-env.seed(899)
+env.seed(799)
 for i in range(20):
     score = 0
     
