@@ -26,7 +26,7 @@ Advantage is not quite big here because this is a simple example with search spa
     python enas_contoller.py
     python plot_controller_performance.py
     
-### Directly see out one of the best model performing i.e, controller samples one of this at end of training (and it has different test env seed not the one we used for validation!)
+### Directly see one of the best model from our search space performing i.e, controller samples one of this at end of training
 
     sudo apt-get install ffmpeg
     cd best_model
