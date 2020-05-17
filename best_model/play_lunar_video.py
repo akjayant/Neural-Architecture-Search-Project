@@ -279,7 +279,7 @@ dqn_agent = DQNAgent(state_size, action_size, 0,2048,256)
 
 
 #-----------------LOADING THE BEST MODEL
-dqn_agent.q_network.load_state_dict(torch.load('solved_200_2048_256_1_0.pth'))
+dqn_agent.q_network.load_state_dict(torch.load('solved_200_256_256_0_0.pth'))
 
 
 # In[31]:
