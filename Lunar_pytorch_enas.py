@@ -270,10 +270,10 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     cuda_flag=0
-    while cuda_flag==0:
+    
 
-        device = torch.device('cuda:0')
-        cuda_flag=1
+    device = set_device()
+       
 
 
 
