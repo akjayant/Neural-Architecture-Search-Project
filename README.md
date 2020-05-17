@@ -26,8 +26,8 @@ Advantage is not quite big here because this is a simple example with search spa
     python enas_contoller.py 
     
 ### Directly see out one of the best model performing i.e, controller samples one of this at end of training (and it has different test env seed not the one we used for validation!)
-   (256,relu,256,relu)-
-   
+
+    sudo apt-get install ffmpeg
     cd best_model
     python play_lunar_video.py 
     
