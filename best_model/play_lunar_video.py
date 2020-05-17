@@ -63,7 +63,7 @@ class QNetwork(nn.Module):
 
     def forward(self, x):
         """Forward pass"""
-        x = torch.sigmoid(self.fc1(x))
+        x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
 
@@ -271,15 +271,15 @@ print('State size: {}, action size: {}'.format(state_size, action_size))
 
 # In[14]:
 
-
-dqn_agent = DQNAgent(state_size, action_size, 0,2048,256)
+###Change this accordingly
+dqn_agent = DQNAgent(state_size, action_size, 0,128,2048)
 
 
 
 
 
 #-----------------LOADING THE BEST MODEL
-dqn_agent.q_network.load_state_dict(torch.load('solved_200_256_256_0_0.pth'))
+dqn_agent.q_network.load_state_dict(torch.load('solved_200_128_2048_0_0.pth'))
 
 
 # In[31]:
