@@ -188,10 +188,13 @@ class ENAS():
             loss.backward()
             self.controller_optim.step()
             f = open("controller_performance_tracker_run_2.txt","a")
-            rewards_history = f.readlines()
             f.write(str(sum(epoch_average_reward_tracker)/len(epoch_average_reward_tracker))+'\n')
+            rewards_history = f.readlines()
             f.close()
             loss_tracker.append(loss)
+            f = open("controller_performance_tracker_run_2.txt","r")
+            rewards_history = f.readlines()
+            f.close()
             #Convergence Condition--------------
             if ep>25:
                 rewards_history = [float(i) for i in rewards_history]
