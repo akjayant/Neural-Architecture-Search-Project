@@ -192,15 +192,17 @@ class ENAS():
             rewards_history = f.readlines()
             f.close()
             loss_tracker.append(loss)
-            f = open("controller_performance_tracker_run_2.txt","r")
-            rewards_history = f.readlines()
-            f.close()
-            #Convergence Condition--------------
+            
+            #Convergence Condition--------------variance of previous 7 sample mean performance of architectures < 20 and mean reward >=220
             if ep>25:
+                f = open("controller_performance_tracker_run_2.txt","r")
+                rewards_history = f.readlines()
+                f.close()
                 rewards_history = [float(i) for i in rewards_history]
                 prev_7_rewards = np.array(rewards_history[-7:])
-                if prev_7_rewards.var()<20 and prev_7_rewards.mean()>220:
+                if prev_7_rewards.var()<20 and prev_7_rewards.mean()>=220:
                     break
+
             print("Contoller Loss=",loss)
         print("One of the good models : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
         print("One of the good models : Dense layers - {} Activation Function - {}".format(self.controller_model.sample()[0],self.controller_model.sample()[1]))
