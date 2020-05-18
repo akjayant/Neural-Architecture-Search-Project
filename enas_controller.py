@@ -189,7 +189,7 @@ class ENAS():
             self.controller_optim.step()
             f = open("controller_performance_tracker_run_2.txt","a")
             f.write(str(sum(epoch_average_reward_tracker)/len(epoch_average_reward_tracker))+'\n')
-            rewards_history = f.readlines()
+            #rewards_history = f.readlines()
             f.close()
             loss_tracker.append(loss)
             
