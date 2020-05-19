@@ -99,12 +99,18 @@ class ExperienceReplays:
 
 #-------------------------DUEL DQN ALGORITHM---------------------------------
 class DDQN:
-    def __init__(self, state_size, action_size, seed,n_fc1,n_fc2,af_1,af_2,device):
+    def __init__(self, state_size, action_size, seed,n_fc1,n_fc2,af_1,af_2,device, BUFFER_SIZE, BATCH_SIZE,GAMMA, TAU, LR, UPDATE_EVERY):
         #self.learn_mode = learn_mode
         self.device = device
         self.state_size = state_size
         self.action_size = action_size
         self.seed = seed
+        self.BUFFER_SIZE = BUFFER_SIZE
+        self.BATCH_SIZE = BATCH_SIZE
+        self.GAMMA = GAMMA
+        self.UPDATE_EVERY = UPDATE_EVERY
+        self.TAU = TAU
+        self.LR = LR
         #--------Initialize Q and Fixed Q networks with same architecture---------
         print("Device check - ",self.device)
         self.q_network = QNet(state_size, action_size, seed, n_fc1, n_fc2,af_1,af_2).to(self.device)
@@ -157,8 +163,8 @@ class DDQN:
 
 
 
-        self.optimizer = optim.Adam(self.q_network.parameters())
-        self.memory = ExperienceReplays(BUFFER_SIZE, BATCH_SIZE, seed, self.device)  #alloting memory for experience buffer
+        self.optimizer = optim.Adam(self.q_network.parameters(),lr=self.LR)
+        self.memory = ExperienceReplays(self.BUFFER_SIZE, self.BATCH_SIZE, seed, self.device)  #alloting memory for experience buffer
         self.timestep = 0
         #return flag_1,flag_2
 
@@ -166,8 +172,8 @@ class DDQN:
     def step(self, state, action, reward, next_state, done):
         self.memory.add(state, action, reward, next_state, done)   #adds experience to replay buffer
         self.timestep += 1
-        if self.timestep % UPDATE_EVERY == 0:
-            if len(self.memory) > BATCH_SIZE:
+        if self.timestep % self.UPDATE_EVERY == 0:
+            if len(self.memory) > self.BATCH_SIZE:
                 sampled_experiences = self.memory.sample()   #randomly samples from experience
                 self.learn(sampled_experiences)
 
@@ -175,7 +181,7 @@ class DDQN:
         states, actions, rewards, next_states, dones = experiences
         action_values = self.fixed_network(next_states).detach()
         max_action_values = action_values.max(1)[0].unsqueeze(1)
-        Q_target = rewards + (GAMMA * max_action_values * (1 - dones))
+        Q_target = rewards + (self.GAMMA * max_action_values * (1 - dones))
         Q_expected = self.q_network(states).gather(1, actions)
         loss = F.mse_loss(Q_expected, Q_target)
         self.optimizer.zero_grad()
@@ -187,7 +193,7 @@ class DDQN:
 
     def update_fixed_network(self, q_network, fixed_network):
         for source_parameters, target_parameters in zip(q_network.parameters(), fixed_network.parameters()):
-            target_parameters.data.copy_(TAU * source_parameters.data + (1.0 - TAU) * target_parameters.data)
+            target_parameters.data.copy_(self.TAU * source_parameters.data + (1.0 - self.TAU) * target_parameters.data)
 
 
     def epsilor_greedy_act(self, state, eps=0.0):
@@ -212,43 +218,9 @@ class DDQN:
         torch.save(self.q_network.state_dict(), filename)
 
 
-# In[11]:
-
-#---------------PARAMETERS-----------------------------------------------------
 
 
 
-# In[13]:
-
-#
-# # Get state and action sizes
-
-#
-# print('State size: {}, action size: {}'.format(state_size, action_size))
-
-
-# In[14]:
-
-
-
-
-
-# In[15]:
-BUFFER_SIZE = int(1e5) # Replay memory size
-BATCH_SIZE = 64         # Number of experiences to sample from memory
-GAMMA = 0.99           # Discount factor
-TAU = 1e-3              # Soft update parameter for updating fixed q network instead of updating fixed  Q network after some steps
-LR = 5e-4               # Q Network learning rate
-UPDATE_EVERY = 5        # How often to update Q network
-MAX_EPISODES = 1700  # Max number of episodes to play
-MAX_STEPS = 900   # Max steps allowed in a single episode/play
-ENV_SOLVED = 200     # MAX score at which we consider environment to be solved
-PRINT_EVERY = 100    # How often to print the progress
-EPS_START = 1.0      # Default/starting value of eps
-EPS_DECAY = 0.999    # Epsilon decay rate - this decay rate is selected so as
-EPS_MIN = 0.01       # Minimum epsilon
-
-#device = set_device()
 
 
 #----------------------------------TRAINING-------------------------------------------
@@ -269,16 +241,9 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     env = set_env_seed(env_seed)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
-    cuda_flag=0
-    
-
     device = set_device()
-       
-
-
-
     print("Device initialised - ", device)
-    dqn_agent = DDQN(state_size, action_size, 0,n_fc1,n_fc2,af_1,af_2,device)
+    dqn_agent = DDQN(state_size, action_size, 0,n_fc1,n_fc2,af_1,af_2,device, BUFFER_SIZE, BATCH_SIZE,GAMMA, TAU, LR, UPDATE_EVERY)
     f1 = open("non_converging_models.txt",'r')
     ncm = f1.readlines()
     if str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2) in ncm:
@@ -423,7 +388,7 @@ def test(n_fc1,n_fc2,af_1,af_2,mm):
             print("Average_Score = ",avg_score)
             f = open("logger_results_enas.txt",'a')
             f.write('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'\t'+str(total_score/500)+'\t'+'\n')
-            
+
             #r_dict = load_pickle("reward_dict.pkl")
             search_key = str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)
             r_dict[search_key] = avg_score
