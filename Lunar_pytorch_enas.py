@@ -229,7 +229,7 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     BATCH_SIZE = 64         # Number of experiences to sample from memory
     GAMMA = 0.99           # Discount factor
     TAU = 1e-3              # Soft update parameter for updating fixed q network instead of updating fixed  Q network after some steps
-    LR = 5e-4               # Q Network learning rate
+    LR = 9e-4               # Q Network learning rate
     UPDATE_EVERY = 5        # How often to update Q network
     MAX_EPISODES =  1700  # Max number of episodes to play
     MAX_STEPS = 900     # Max steps allowed in a single episode/play
