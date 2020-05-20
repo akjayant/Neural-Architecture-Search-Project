@@ -376,7 +376,7 @@ def test(n_fc1,n_fc2,af_1,af_2,mm):
             r_dict = load_pickle("reward_dict.pkl")
         except:
             r_dict={}
-            dump_pickle(aa,"reward_dict")
+            dump_pickle(r_dict,"reward_dict")
         search_key = str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)
         if  search_key in r_dict.keys():
             avg_score = r_dict[search_key]
