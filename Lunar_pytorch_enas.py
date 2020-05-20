@@ -229,7 +229,7 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     BATCH_SIZE = 64         # Number of experiences to sample from memory
     GAMMA = 0.99           # Discount factor
     TAU = 1e-3              # Soft update parameter for updating fixed q network instead of updating fixed  Q network after some steps
-    LR = 9e-4               # Q Network learning rate
+    LR = 1e-3               # Q Network learning rate
     UPDATE_EVERY = 5        # How often to update Q network
     MAX_EPISODES =  1700  # Max number of episodes to play
     MAX_STEPS = 900     # Max steps allowed in a single episode/play
@@ -246,6 +246,7 @@ def train_dqn(n_fc1,n_fc2,af_1,af_2,env_seed):
     dqn_agent = DDQN(state_size, action_size, 0,n_fc1,n_fc2,af_1,af_2,device, BUFFER_SIZE, BATCH_SIZE,GAMMA, TAU, LR, UPDATE_EVERY)
     f1 = open("non_converging_models.txt",'r')
     ncm = f1.readlines()
+    f1.close()
     if str(n_fc1)+"_"+str(n_fc2)+"_"+str(af_1)+"_"+str(af_2) in ncm:
         ncm_flag = 1
     else:
@@ -349,9 +350,16 @@ def dump_pickle(obj,name):
 
 #--------------TESTING------------------------------------------------------------------------------
 def test(n_fc1,n_fc2,af_1,af_2,mm):
+    BUFFER_SIZE = int(1e5) # Replay memory size
+    BATCH_SIZE = 64         # Number of experiences to sample from memory
+    GAMMA = 0.99           # Discount factor
+    TAU = 1e-3              # Soft update parameter for updating fixed q network instead of updating fixed  Q network after some steps
+    LR = 9e-4               # Q Network learning rate
+    UPDATE_EVERY = 5 
     try:
         device = set_device()
-        dqn_agent = DDQN(8,4, 0,n_fc1,n_fc2,af_1,af_2,device)
+        
+        dqn_agent = DDQN(8,4, 0,n_fc1,n_fc2,af_1,af_2,device,BUFFER_SIZE, BATCH_SIZE,GAMMA, TAU, LR, UPDATE_EVERY)
         dqn_agent.q_network.load_state_dict(torch.load('solved_200_'+str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)+'.pth'))
         #dqn_agent.eval()
         print("model_loaded")
