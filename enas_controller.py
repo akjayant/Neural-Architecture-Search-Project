@@ -96,6 +96,8 @@ class Controller(nn.Module):
             logits, hidden = self.forward(inputs,hidden,i,i==0)
             probs = F.softmax(logits, dim=-1)
             log_prob = F.log_softmax(logits, dim=-1)
+
+        ##------Sample action according to probabality distribution NOT ARGMAX!!!
             action = probs.multinomial(num_samples=1).data
             selected_log_prob = log_prob.gather(1,get_variable(action,requires_grad=False))
             mode = i % 2
@@ -200,7 +202,7 @@ class ENAS():
                 f.close()
                 rewards_history = [float(i) for i in rewards_history]
                 prev_7_rewards = np.array(rewards_history[-7:])
-                if prev_7_rewards.var()<20 and prev_7_rewards.mean()>=220:
+                if prev_7_rewards.std()<15 and prev_7_rewards.mean()>=220:
                     break
 
             print("Contoller Loss=",loss)
