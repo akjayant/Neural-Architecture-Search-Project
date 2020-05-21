@@ -48,5 +48,6 @@ Advantage is not quite big here because this is a simple example with search spa
 2) (2048,relu,2048,relu)
 ![rr](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/impact_of_architecture_choice_ddqn_results/model_env_seed_4/solved_200_2048_2048_4.png)
 #### 2) NAS techniques till now are not good enough for finding a global optimal or state of the art architecture and it also have human bias but it does help in finding the best from a given search space efficiently and since neural networks used in RL applications till now are not overly complex this can be a good option! 
-## Challenge - 
-#### Randomness in training data due to epsilon greedy approach to account for exploitaion-exploration trade off.
+## Challenge remains to be addressed! 
+1. Randomness in training data due to epsilon greedy approach to account for exploitaion-exploration trade off.
+2. Scalability issue of this for more complex & large networks like CNNs still exist where training a single CNN takes lot of time.
