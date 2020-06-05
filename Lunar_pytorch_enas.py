@@ -377,10 +377,6 @@ def test(n_fc1,n_fc2,af_1,af_2,mm):
         except:
             r_dict={}
             dump_pickle(r_dict,"reward_dict")
-<<<<<<< HEAD
-
-=======
->>>>>>> 781b26fab74e392d80e270f83302b73373f43abc
         search_key = str(n_fc1)+'_'+str(n_fc2)+'_'+str(af_1)+"_"+str(af_2)
         if  search_key in r_dict.keys():
             avg_score = r_dict[search_key]
