@@ -33,7 +33,7 @@ Advantage is not quite big here because this is a simple example with search spa
     python play_lunar_video.py 
     
 ## Motivation - 
-### 1) Impact of architecture complexity and choice of activation functions on DDQN learning
+### 1) Impact of architecture complexity and choice of activation functions on DQN learning
 *have been tested across various enviornment seeds
 #### Low complexity and choice of activation function effects stability of training & convergence - 
 1) 32,relu,64,relu
