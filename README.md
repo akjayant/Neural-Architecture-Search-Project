@@ -19,8 +19,8 @@ Plot -
 ![plot](https://github.com/akjayant/Neural-Architecture-Search-Project/raw/master/controller_performance.png)
 
 ### Time Taken - 
-~12 hrs on single NVIDIA GTx 1050 Ti  
-(exhaustive search would have taken ~ 25 hrs)
+~12 hrs on single NVIDIA GTx 1050 Ti  => 83.33% faster than brute force
+(exhaustive search would have taken ~ 22 hrs)
 Advantage is not quite big here because this is a simple example with search space including just 100 architectures, however this difference would have been huge if search space was big itself.
 ### Run to search
     python enas_contoller.py
