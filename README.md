@@ -20,7 +20,7 @@ Plot -
 
 ### Time Taken - 
 ~12 hrs on single NVIDIA GTx 1050 Ti  
-(exhaustive search would have taken ~18-20 hrs)
+(exhaustive search would have taken ~ 50 hrs)
 Advantage is not quite big here because this is a simple example with search space including just 100 architectures, however this difference would have been huge if search space was big itself.
 ### Run to search
     python enas_contoller.py
